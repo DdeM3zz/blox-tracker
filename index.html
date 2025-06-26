@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roblox Latest User Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Последний зарегистрированный пользователь Roblox</h1>
+        <div class="user-card" id="userCard">
+            <div class="loader"></div>
+            <p>Загрузка данных...</p>
+        </div>
+        <div class="update-info">
+            Последнее обновление: <span id="lastUpdate">никогда</span>
+            <button onclick="fetchLatestUser()">Обновить</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
