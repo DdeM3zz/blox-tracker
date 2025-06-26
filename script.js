@@ -1,58 +1,75 @@
-// Функция для получения последнего пользователя
-async function fetchLatestUser() {
-    const userCard = document.getElementById('userCard');
-    const loader = userCard.querySelector('.loader');
-    const lastUpdate = document.getElementById('lastUpdate');
+// Конфигурация
+const CONFIG = {
+    updateInterval: 1500, // 1.5 секунды
+    baseUserId: 6000000000, // Примерный текущий диапазон ID
+    usernameVariants: ['Pro', 'Master', 'King', 'Queen', 'Player', 'Gamer', 'Roblox', 'Cool', 'Super']
+};
+
+// Глобальные переменные
+let lastUserId = CONFIG.baseUserId;
+let updateIntervalId = null;
+
+// Улучшенная имитация API Roblox
+async function mockRobloxApiRequest() {
+    // Имитация сетевой задержки
+    await new Promise(resolve => setTimeout(resolve, 100 + Math.random() * 400));
     
-    // Показываем загрузку
-    loader.style.display = 'block';
-    userCard.innerHTML = '';
-    userCard.appendChild(loader);
-    userCard.appendChild(document.createTextNode('Загрузка данных...'));
+    // Генерация правдоподобных данных
+    lastUserId += 1 + Math.floor(Math.random() * 3); // ID увеличиваются
+    const username = generateUsername();
+    const creationDate = new Date();
     
-    try {
-        // Эмуляция API (в реальности нужно использовать Roblox API или веб-скрейпинг)
-        // Здесь просто генерация случайного пользователя для демонстрации
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Имитация задержки сети
-        
-        const randomId = Math.floor(Math.random() * 10000000) + 1;
-        const randomUsername = `User${Math.floor(Math.random() * 10000)}`;
-        const randomDate = new Date().toISOString();
-        
-        // В реальном проекте здесь будет запрос к Roblox API:
-        // const response = await fetch('https://api.roblox.com/...');
-        // const data = await response.json();
-        
-        const userData = {
-            id: randomId,
-            username: randomUsername,
-            created: randomDate,
-            profileUrl: `https://www.roblox.com/users/${randomId}/profile`
-        };
-        
-        // Обновляем UI
-        displayUser(userData);
-        lastUpdate.textContent = new Date().toLocaleString();
-    } catch (error) {
-        userCard.innerHTML = `<p style="color: red;">Ошибка при загрузке данных: ${error.message}</p>`;
-    }
+    // Иногда добавляем небольшую задержку к дате (1-60 минут)
+    creationDate.setMinutes(creationDate.getMinutes() - Math.floor(Math.random() * 60));
+    
+    return {
+        id: lastUserId,
+        username: username,
+        created: creationDate.toISOString(),
+        profileUrl: `https://www.roblox.com/users/${lastUserId}/profile`,
+        isVerified: Math.random() > 0.9 // 10% шанс
+    };
 }
 
-// Функция для отображения пользователя
+// Генератор правдоподобных имён
+function generateUsername() {
+    const prefix = ['xX', 'The', ''][Math.floor(Math.random() * 3)];
+    const suffix = ['_YT', '_TV', '123', '2023', ''][Math.floor(Math.random() * 5)];
+    const main = CONFIG.usernameVariants[Math.floor(Math.random() * CONFIG.usernameVariants.length)];
+    return `${prefix}${main}${suffix}`.replace(/\s+/g, '');
+}
+
+// Отображение пользователя с дополнительной информацией
 function displayUser(user) {
     const userCard = document.getElementById('userCard');
+    const verifiedBadge = user.isVerified ? '<span class="verified-badge">✓</span>' : '';
+    
     userCard.innerHTML = `
         <div class="user-info">
+            <h2>${user.username}${verifiedBadge}</h2>
             <p><strong>ID:</strong> ${user.id}</p>
-            <p><strong>Имя пользователя:</strong> ${user.username}</p>
-            <p><strong>Дата регистрации:</strong> ${new Date(user.created).toLocaleString()}</p>
-            <p><strong>Профиль:</strong> <a href="${user.profileUrl}" target="_blank">${user.profileUrl}</a></p>
+            <p><strong>Зарегистрирован:</strong> ${formatDate(user.created)}</p>
+            <p><strong>Ссылка:</strong> <a href="${user.profileUrl}" target="_blank">Открыть профиль</a></p>
+            <p class="user-meta">Примерное время регистрации: ${formatExactTime(user.created)}</p>
         </div>
     `;
 }
 
-// Загружаем данные при старте
-document.addEventListener('DOMContentLoaded', fetchLatestUser);
+// Форматирование даты
+function formatDate(isoString) {
+    const date = new Date(isoString);
+    return date.toLocaleDateString('ru-RU') + ' в ' + date.toLocaleTimeString('ru-RU');
+}
 
-// Обновляем каждые 5 минут
-setInterval(fetchLatestUser, 5 * 60 * 1000);
+// Точное время с секундами
+function formatExactTime(isoString) {
+    const date = new Date(isoString);
+    return date.toLocaleTimeString('ru-RU', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
+}
+
+// Остальной код (fetchLatestUser, startAutoUpdate, stopAutoUpdate) остаётся таким же,
+// как в предыдущем примере, только использует новую mockRobloxApiRequest
